@@ -387,11 +387,11 @@ model = dict(
             ),
             decoder=dict(type="SparsePoint3DDecoder"),
             reg_weights=[1.0] * 40,
-            gt_cls_key="gt_map_labels",
-            gt_reg_key="gt_map_pts",
-            gt_id_key="map_instance_id",
+            #gt_cls_key="gt_map_labels",
+            #gt_reg_key="gt_map_pts",
+            #gt_id_key="map_instance_id",
             with_instance_id=False,
-            task_prefix='map',
+            #task_prefix='map',
         ),
         motion_for_det=dict(
             type='MotionforDetHead',
@@ -650,8 +650,8 @@ train_pipeline = [
             "focal",
             "gt_bboxes_3d",
             "gt_labels_3d",
-            'gt_map_labels', 
-            'gt_map_pts',
+            #'gt_map_labels', 
+            #'gt_map_pts',
             'gt_agent_fut_trajs',
             'gt_agent_fut_masks',
             'gt_ego_fut_trajs',
@@ -660,6 +660,7 @@ train_pipeline = [
             'ego_status',
         ],
         meta_keys=["T_global", "T_global_inv", "timestamp", "instance_id"],
+        
     ),
 ]
 test_pipeline = [

@@ -102,9 +102,11 @@ def custom_train_detector(
         )
 
     else:
-        model = MMDataParallel(
-            model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids
-        )
+        # model = MMDataParallel(
+        #     model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids
+        # )
+        model = model.cuda()
+
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)

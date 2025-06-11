@@ -308,7 +308,7 @@ class NuScenes3DDataset(Dataset):
             ego2global_translation=info["ego2global_translation"],
             ego2global_rotation=info["ego2global_rotation"],
             ego_status=info['ego_status'].astype(np.float32),
-            map_infos=info["map_annos"],
+            #map_infos=info["map_annos"],
         )
         lidar2ego = np.eye(4)
         lidar2ego[:3, :3] = pyquaternion.Quaternion(
@@ -322,8 +322,8 @@ class NuScenes3DDataset(Dataset):
         ego2global[:3, 3] = np.array(info["ego2global_translation"])
         input_dict["lidar2global"] = ego2global @ lidar2ego
 
-        map_geoms = self.anno2geom(info["map_annos"])
-        input_dict["map_geoms"] = map_geoms
+        #map_geoms = self.anno2geom(info["map_annos"])
+        #input_dict["map_geoms"] = map_geoms
 
         if self.modality["use_camera"]:
             image_paths = []
