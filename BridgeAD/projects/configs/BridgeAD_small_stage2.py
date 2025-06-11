@@ -602,7 +602,7 @@ model = dict(
 # ================== data ========================
 dataset_type = "NuScenes3DDataset"
 data_root = "data/nuscenes/"
-anno_root = "data/infos/" if version == 'trainval' else "data/infos/mini/"
+anno_root = "/content/XAI-for-BridgeAD/XAI_Scripts/utils/" if version == 'trainval' else "/content/XAI-for-BridgeAD/XAI_Scripts/utils/"
 file_client_args = dict(backend="disk")
 
 img_norm_cfg = dict(
@@ -813,4 +813,5 @@ evaluation = dict(
 )
 
 # ================== pretrained model ========================
-load_from = 'work_dirs/your_path_stage1.pth'
+
+#load_from = 'work_dirs/your_path_stage1.pth'
