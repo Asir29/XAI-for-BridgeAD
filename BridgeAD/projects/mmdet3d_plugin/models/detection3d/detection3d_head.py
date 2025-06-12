@@ -1,4 +1,6 @@
 from typing import List, Optional, Tuple, Union
+from mmcv.parallel import DataContainer
+
 import warnings
 
 import numpy as np
@@ -203,19 +205,33 @@ class Sparse4DHead(BaseModule):
         attn_mask = None
         dn_metas = None
         temp_dn_reg_target = None
+
         if self.training and hasattr(self.sampler, "get_dn_anchors"):
-            if self.gt_id_key in metas["img_metas"][0]:
+            # Unwrap DataContainers first
+            img_metas = metas["img_metas"]
+            if isinstance(img_metas, DataContainer):
+                img_metas = img_metas.data[0]
+
+            gt_cls = metas[self.gt_cls_key]
+            if isinstance(gt_cls, DataContainer):
+                gt_cls = gt_cls.data[0]
+
+            gt_reg = metas[self.gt_reg_key]
+            if isinstance(gt_reg, DataContainer):
+                gt_reg = gt_reg.data[0]
+
+            # Safely access GT instance ids
+            if self.gt_id_key in img_metas[0]:
                 gt_instance_id = [
-                    torch.from_numpy(x[self.gt_id_key]).cuda()
-                    for x in metas["img_metas"]
+                    torch.from_numpy(x[self.gt_id_key]).cuda() for x in img_metas
                 ]
             else:
                 gt_instance_id = None
+
             dn_metas = self.sampler.get_dn_anchors(
-                metas[self.gt_cls_key],
-                metas[self.gt_reg_key],
-                gt_instance_id,
+                gt_cls, gt_reg, gt_instance_id
             )
+
         if dn_metas is not None:
             (
                 dn_anchor,

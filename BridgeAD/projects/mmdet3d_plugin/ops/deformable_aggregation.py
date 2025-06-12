@@ -1,7 +1,6 @@
 import torch
 from torch.autograd.function import Function, once_differentiable
 
-from . import deformable_aggregation_ext
 
 
 class DeformableAggregationFunction(Function):
@@ -20,6 +19,8 @@ class DeformableAggregationFunction(Function):
         scale_start_index = scale_start_index.contiguous().int()
         sampling_location = sampling_location.contiguous().float()
         weights = weights.contiguous().float()
+        from . import deformable_aggregation_ext
+
         output = deformable_aggregation_ext.deformable_aggregation_forward(
             mc_ms_feat,
             spatial_shape,

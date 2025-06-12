@@ -1,6 +1,5 @@
 # ================ base config ===================
 version = 'mini'
-version = 'trainval'
 length = {'trainval': 28130, 'mini': 323}
 
 plugin = True
@@ -801,7 +800,7 @@ runner = dict(
 eval_mode = dict(
     with_det=True,
     with_tracking=True,
-    with_map=True,
+    with_map=False,
     with_motion=True,
     with_planning=True,
     tracking_threshold=0.2,

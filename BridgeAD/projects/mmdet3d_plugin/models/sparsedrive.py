@@ -1,4 +1,5 @@
 from inspect import signature
+from mmcv.parallel import DataContainer
 
 import torch
 
@@ -59,7 +60,9 @@ class SparseDrive(BaseDetector):
 
     @auto_fp16(apply_to=("img",), out_fp32=True)
     def extract_feat(self, img, return_depth=False, metas=None):  # torch.Size([8, 6, 3, 256, 704])
+        img = img.data[0] if isinstance(img, DataContainer) else img
         bs = img.shape[0]
+
         if img.dim() == 5:  # multi-view
             num_cams = img.shape[1]
             img = img.flatten(end_dim=1)
@@ -67,10 +70,15 @@ class SparseDrive(BaseDetector):
             num_cams = 1
         if self.use_grid_mask:
             img = self.grid_mask(img)
+
+        # Ensure img is on correct dtype/device for mixed precision
+        img = img.to(dtype=next(self.parameters()).dtype, device=next(self.parameters()).device)
+
         if "metas" in signature(self.img_backbone.forward).parameters:
             feature_maps = self.img_backbone(img, num_cams, metas=metas)
         else:
             feature_maps = self.img_backbone(img)
+
         if self.img_neck is not None:
             feature_maps = list(self.img_neck(feature_maps))
         for i, feat in enumerate(feature_maps):

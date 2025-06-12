@@ -133,6 +133,7 @@ class GridMask(nn.Module):
             )
             x = x * mask + offset * (1 - mask)
         else:
+            mask = mask.to(x.device)
             x = x * mask
 
         return x.view(n, c, h, w)

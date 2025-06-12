@@ -165,10 +165,15 @@ class DeformableFeatureAggregation(BaseModule):
         bs, num_anchor = instance_feature.shape[:2]
         feature = instance_feature + anchor_embed
         if self.camera_encoder is not None:
+            # Ensure projection_mat is on the correct device
+            projection_mat = metas["projection_mat"]
+            if isinstance(projection_mat, torch.Tensor):
+                projection_mat = projection_mat.to(instance_feature.device)
+            else:
+                projection_mat = torch.tensor(projection_mat, device=instance_feature.device)
+
             camera_embed = self.camera_encoder(
-                metas["projection_mat"][:, :, :3].reshape(
-                    bs, self.num_cams, -1
-                )
+                projection_mat[:, :, :3].reshape(bs, self.num_cams, -1)
             )
             feature = feature[:, :, None] + camera_embed[:, None]
 
@@ -194,23 +199,38 @@ class DeformableFeatureAggregation(BaseModule):
                 1 - self.attn_drop
             )
         return weights
-
+        
     @staticmethod
     def project_points(key_points, projection_mat, image_wh=None):
         bs, num_anchor, num_pts = key_points.shape[:3]
 
+        # Move projection_mat and image_wh to same device as key_points
+        device = key_points.device
+        projection_mat = projection_mat.to(device)
+        if image_wh is not None:
+            image_wh = image_wh.to(device)
+
+        # Homogeneous coordinates
         pts_extend = torch.cat(
             [key_points, torch.ones_like(key_points[..., :1])], dim=-1
         )
+
+        # Project to 2D
         points_2d = torch.matmul(
             projection_mat[:, :, None, None], pts_extend[:, None, ..., None]
         ).squeeze(-1)
+
+        # Normalize by depth (z)
         points_2d = points_2d[..., :2] / torch.clamp(
             points_2d[..., 2:3], min=1e-5
         )
+
+        # Normalize by image width/height if provided
         if image_wh is not None:
             points_2d = points_2d / image_wh[:, :, None, None]
+
         return points_2d
+
 
     @staticmethod
     def feature_sampling(
